@@ -1,0 +1,80 @@
+matrix-os A10 status widget system
+# matrix-OS-A10-status.py
+# Matrix Windows Unified Status Service
+# Matrix Instruction Manual, ARM Index, Volume 1
+
+from flask import Flask, jsonify
+import importlib.util
+import psutil
+import time
+from pathlib import Path
+
+APP_DIR = Path(__file__).parent.resolve()
+START_TIME = time.time()
+
+def load_module(module_name: str, filename: str):
+    """Load any Matrix file dynamically even with hyphens in filename."""
+    path = APP_DIR / filename
+    spec = importlib.util.spec_from_file_location(module_name, str(path))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+# Load database and AI engine
+db = load_module("matrix_os_a5_database", "matrix-OS-A5-database.py")
+ai_mod = load_module("matrix_os_a6_ai_engine", "matrix-OS-A6-ai-engine.py")
+MatrixAI = ai_mod.MatrixAI
+
+# Initialize Flask app
+app = Flask(__name__)
+
+# Create one AI instance
+AI = MatrixAI()
+
+def get_uptime():
+    seconds = int(time.time() - START_TIME)
+    h = seconds // 3600
+    m = (seconds % 3600) // 60
+    s = seconds % 60
+    return f"{h:02d}:{m:02d}:{s:02d}"
+
+@app.route("/api/status", methods=["GET"])
+def status():
+    """Return full system health and Matrix AI status."""
+    try:
+        cpu = psutil.cpu_percent(interval=0.5)
+        mem = psutil.virtual_memory().percent
+        users = len(db.list_users())
+        uptime = get_uptime()
+
+        ai_status = {
+            "session_active": AI.session_active,
+            "user": AI.user,
+            "memory_entries": len(AI.memory)
+        }
+
+        return jsonify({
+            "ok": True,
+            "uptime": uptime,
+            "cpu_percent": cpu,
+            "memory_percent": mem,
+            "registered_users": users,
+            "ai_status": ai_status
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/api/status/ai", methods=["GET"])
+def ai_log():
+    """Return AI memory log only."""
+    try:
+        return jsonify({"ok": True, "log": AI.show_log()})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+if __name__ == "__main__":
+    # Run: python matrix-OS-A10-status.py
+    # Access: http://127.0.0.1:5070/api/status
+    app.run(host="127.0.0.1", port=5070, debug=True)
