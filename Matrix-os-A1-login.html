@@ -1,0 +1,79 @@
+matrix-os-A1-login.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix Windows - Biometric Login</title>
+  <style>
+    body {
+      background: radial-gradient(circle at center, #0a0a12, #000);
+      color: #00fff9;
+      font-family: "Orbitron", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 2rem;
+      text-shadow: 0 0 10px #00fff9;
+      margin-bottom: 10px;
+    }
+
+    .scanner {
+      border: 2px solid #00fff9;
+      border-radius: 50%;
+      width: 200px;
+      height: 200px;
+      box-shadow: 0 0 40px #00fff9;
+      position: relative;
+      animation: pulse 3s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 40px #00fff9; }
+      50% { box-shadow: 0 0 80px #00fff9; }
+    }
+
+    .text {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      opacity: 0.8;
+    }
+
+    button {
+      margin-top: 40px;
+      padding: 10px 30px;
+      background: #00fff9;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #0ff;
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Matrix Windows Biometric Login</h1>
+  <div class="scanner"></div>
+  <div class="text">Scanning Facial, Voice, and Iris Data...</div>
+  <button onclick="startLogin()">Access Matrix</button>
+
+  <script>
+    function startLogin() {
+      alert("Biometric scan complete. Redirecting to Core System...");
+      window.location.href = "matrix-OS-A2-core.py";
+    }
+  </script>
+</body>
+</html>
