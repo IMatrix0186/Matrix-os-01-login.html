@@ -1,0 +1,112 @@
+matrix-os A17 sessions system
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Matrix Windows – Sessions Viewer</title>
+<style>
+  body {
+    background: linear-gradient(135deg,#000,#061520 50%,#00212b);
+    color:#00fff9;
+    font-family:"Orbitron",sans-serif;
+    margin:0; padding:20px;
+  }
+  h1 { text-align:center; text-shadow:0 0 18px #00fff9; margin-bottom:20px; }
+  .card {
+    border:1px solid #00fff9;
+    background:rgba(0,0,0,.6);
+    border-radius:12px;
+    padding:16px;
+    box-shadow:0 0 24px #00fff9;
+    max-width:900px;
+    margin:0 auto;
+  }
+  table { width:100%; border-collapse:collapse; margin-top:10px; }
+  th, td { padding:10px; border-bottom:1px solid #00fff9; text-align:center; }
+  th { background:rgba(0,255,249,.1); text-shadow:0 0 5px #00fff9; }
+  button {
+    background:#00fff9; color:#000; border:none;
+    border-radius:6px; padding:6px 12px; font-weight:700; cursor:pointer;
+  }
+  button:hover { background:#0ff; transform:scale(1.05); }
+  .muted { color:#aee; opacity:.85; }
+</style>
+</head>
+<body>
+  <h1>Matrix Active Sessions</h1>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <span class="muted">From A15 Admin API</span>
+      <button onclick="loadSessions()">Refresh</button>
+    </div>
+    <table id="sessionsTable">
+      <thead>
+        <tr><th>Username</th><th>Level</th><th>Token</th><th>Created</th><th>Revoke</th></tr>
+      </thead>
+      <tbody><tr><td colspan="5">Loading…</td></tr></tbody>
+    </table>
+  </div>
+
+<script>
+const ADMIN = "http://127.0.0.1:5090";
+const SESSIONS = ADMIN + "/api/admin/sessions";
+const REVOKE   = ADMIN + "/api/admin/session/revoke";
+
+function setRows(rowsHTML){
+  document.querySelector("#sessionsTable tbody").innerHTML = rowsHTML;
+}
+
+async function loadSessions(){
+  try{
+    const r = await fetch(SESSIONS);
+    const j = await r.json();
+    if(!j.ok) return setRows(`<tr><td colspan="5">Error: ${j.error || "Unknown"}</td></tr>`);
+    const data = j.sessions || {};
+    const keys = Object.keys(data);
+    if(!keys.length) return setRows(`<tr><td colspan="5">No active sessions.</td></tr>`);
+    const html = keys.map(token=>{
+      const s = data[token];
+      const user = s.user || s.username || "—";
+      const lvl = s.level || "—";
+      const created = s.created || s.time || "—";
+      return `
+        <tr>
+          <td>${user}</td>
+          <td>${lvl}</td>
+          <td style="font-size:.8rem;word-break:break-all;">${token}</td>
+          <td>${created}</td>
+          <td><button onclick="revoke('${token}')">Revoke</button></td>
+        </tr>`;
+    }).join("");
+    setRows(html);
+  }catch(e){
+    setRows(`<tr><td colspan="5">Connection error: ${e}</td></tr>`);
+  }
+}
+
+async function revoke(token){
+  if(!confirm("Revoke this session?")) return;
+  try{
+    const r = await fetch(REVOKE,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ token })
+    });
+    const j = await r.json();
+    alert(j.ok ? "Session revoked ✅" : ("Error: " + (j.error || "Unknown")));
+    loadSessions();
+  }catch(e){
+    alert("Connection error: " + e);
+  }
+}
+
+loadSessions();
+setInterval(loadSessions, 10000);
+</script>
+
+<!-- Protect this page: require Developer (Level 3) -->
+<script src="matrix-OS-A14-guard.js" data-min-level="3"></script>
+</body>
+</html>
