@@ -1,0 +1,99 @@
+matrix-os dashboard interface
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix Windows - Dashboard</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #000, #03060c, #001d26);
+      color: #00fff9;
+      font-family: "Orbitron", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      text-shadow: 0 0 20px #00fff9;
+      margin-bottom: 10px;
+    }
+
+    .panel {
+      border: 1px solid #00fff9;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 40px #00fff9;
+      background-color: rgba(0, 0, 0, 0.5);
+      width: 400px;
+      max-width: 80%;
+    }
+
+    .panel h2 {
+      font-size: 1.4rem;
+      color: #00fff9;
+      text-shadow: 0 0 8px #00fff9;
+    }
+
+    .info {
+      margin-top: 20px;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #aee;
+    }
+
+    button {
+      margin-top: 25px;
+      padding: 12px 35px;
+      background: #00fff9;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #0ff;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to Matrix Windows</h1>
+
+  <div class="panel">
+    <h2>System Access: Authorized</h2>
+    <div class="info">
+      <p><strong>User:</strong> Admin</p>
+      <p><strong>Security Level:</strong> Developer (Level 3)</p>
+      <p><strong>Status:</strong> Active Session</p>
+      <p><strong>System Time:</strong> <span id="clock"></span></p>
+    </div>
+
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <script>
+    // Live digital clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function logout() {
+      alert('Session Ended. Logging out...');
+      window.location.href = 'matrix-OS-A1-login.html';
+    }
+  </script>
+</body>
+</html>
