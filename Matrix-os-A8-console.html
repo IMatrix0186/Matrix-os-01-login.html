@@ -1,0 +1,103 @@
+matrix-os A8 console system
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Matrix Windows – AI Command Console</title>
+<style>
+  body {
+    background: radial-gradient(circle at center, #000, #010b14, #021f27);
+    color: #00fff9;
+    font-family: "Orbitron", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+  }
+  h1 {
+    text-shadow: 0 0 15px #00fff9;
+  }
+  .console {
+    border: 1px solid #00fff9;
+    background-color: rgba(0,0,0,0.6);
+    border-radius: 10px;
+    padding: 20px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 0 30px #00fff9;
+  }
+  input {
+    width: 80%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    margin-top: 20px;
+    text-align: center;
+  }
+  button {
+    margin-top: 15px;
+    padding: 10px 25px;
+    background: #00fff9;
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #0ff;
+    transform: scale(1.05);
+  }
+  pre {
+    text-align: left;
+    color: #aef;
+    margin-top: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+    border-top: 1px solid #00fff9;
+    padding-top: 10px;
+  }
+</style>
+</head>
+<body>
+  <h1>Matrix AI Command Console</h1>
+  <div class="console">
+    <p>Type a command for the Matrix AI Engine (e.g. <code>time</code>, <code>list users</code>, <code>encrypt hello</code>)</p>
+    <input id="commandInput" type="text" placeholder="Enter command here..." />
+    <button onclick="sendCommand()">Send Command</button>
+    <pre id="output"></pre>
+  </div>
+
+<script>
+const API_URL = "http://127.0.0.1:5000/api/ai/command";
+
+async function sendCommand() {
+  const input = document.getElementById("commandInput");
+  const cmd = input.value.trim();
+  if (!cmd) return;
+  document.getElementById("output").textContent += `> ${cmd}\n`;
+  input.value = "";
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: cmd }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById("output").textContent += data.response + "\n\n";
+    } else {
+      document.getElementById("output").textContent += "Error: " + data.error + "\n\n";
+    }
+  } catch (err) {
+    document.getElementById("output").textContent += "⚠️ Connection error: " + err + "\n\n";
+  }
+}
+</script>
+</body>
+</html>
