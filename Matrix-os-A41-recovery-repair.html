@@ -1,0 +1,64 @@
+matrix-os A41 recovery/repair system
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix OS Recovery & Repair</title>
+  <style>
+    body { font-family: 'Orbitron', sans-serif; background:#0a0f14; color:#e6ffff; margin:0; padding:20px; }
+    .container { max-width:800px; margin:40px auto; padding:20px; }
+    h1 { font-size:2rem; text-align:center; text-shadow:0 0 12px #00fff9; margin-bottom:30px; }
+    .repair-card { background:#001b24; border:1px solid #00fff9; border-radius:10px; padding:20px; margin-bottom:20px; box-shadow:0 0 20px rgba(0,255,249,.35); }
+    .repair-card h2 { margin-top:0; color:#8fd3ff; }
+    .description { margin-top:10px; font-size:1rem; }
+    button {
+      background:#00fff9; color:#001016; border:none; padding:10px 16px;
+      border-radius:6px; font-weight:800; cursor:pointer; margin-top:15px; }
+    button:hover { filter:brightness(1.1); }
+    .status { margin-top:15px; font-size:0.9rem; color:#a0f0ff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Matrix OS Recovery & Repair</h1>
+
+    <div class="repair-card">
+      <h2>Automatic Repair</h2>
+      <div class="description">Run an automated repair sequence to fix common issues detected by diagnostics.</div>
+      <button onclick="runAutomaticRepair()">Run Automatic Repair</button>
+      <div class="status" id="repairStatus">Status: Standby</div>
+    </div>
+
+    <div class="repair-card">
+      <h2>Component Re-initialization</h2>
+      <div class="description">Manually re-initialize specific system components that may need a fresh start.</div>
+      <button onclick="reinitializeComponents()">Re-initialize Components</button>
+    </div>
+
+    <div class="repair-card">
+      <h2>System Rollback</h2>
+      <div class="description">Roll back the system to a previous stable state if major issues are encountered.</div>
+      <button onclick="rollbackSystem()">Rollback System</button>
+    </div>
+  </div>
+
+  <script>
+    function runAutomaticRepair() {
+      const status = document.getElementById("repairStatus");
+      status.innerText = "Status: Repair in Progress...";
+      setTimeout(() => {
+        status.innerText = "Status: Repair Complete. All systems nominal.";
+      }, 3000); // Simulate repair time
+    }
+
+    function reinitializeComponents() {
+      alert("Components re-initialized successfully!");
+    }
+
+    function rollbackSystem() {
+      alert("System rolled back to the previous stable state.");
+    }
+  </script>
+</body>
+</html>
