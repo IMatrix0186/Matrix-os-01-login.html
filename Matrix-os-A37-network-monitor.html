@@ -1,0 +1,43 @@
+matrix-os A37 network monitor
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix OS Network Monitor</title>
+  <style>
+    body { font-family: 'Orbitron', sans-serif; background:#0a0f14; color:#e6ffff; margin:0; padding:20px; }
+    .network-container { max-width:800px; margin:20px auto; }
+    .network-header { text-align:center; margin-bottom:30px; }
+    .network-header h1 { font-size:2rem; text-shadow:0 0 10px #00fff9; }
+    .network-table { width:100%; border-collapse:collapse; margin-top:20px; }
+    .network-table th, .network-table td { padding:10px; border:1px solid #00fff9; text-align:left; }
+    .network-table th { background:#001b24; }
+    /* Add more styles for network details here */
+  </style>
+</head>
+<body>
+  <div class="network-container">
+    <div class="network-header">
+      <h1>Network Monitor</h1>
+    </div>
+    <table class="network-table">
+      <thead>
+        <tr>
+          <th>IP Address</th>
+          <th>Status</th>
+          <th>Data Usage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>192.168.1.10</td>
+          <td>Active</td>
+          <td>50 MB</td>
+        </tr>
+        <!-- Add more rows as needed -->
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
