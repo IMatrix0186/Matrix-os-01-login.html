@@ -1,0 +1,61 @@
+matrix-os logs and diagnostics console
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix OS System Logs & Diagnostics</title>
+  <style>
+    body { font-family: 'Orbitron', sans-serif; background:#0a0f14; color:#e6ffff; margin:0; padding:0; }
+    .container { max-width:1000px; margin:40px auto; padding:20px; }
+    h1 { font-size:2rem; font-weight:900; text-shadow:0 0 12px #00fff9; margin-bottom:20px; }
+    .log-container { background:#001b24; border:1px solid #00fff9; border-radius:8px; padding:16px; max-height:500px; overflow-y:auto; }
+    .log-entry { padding:8px; margin-bottom:6px; border-left:4px solid #00fff9; background:rgba(0,0,0,0.4); }
+    .log-entry.info { border-left-color:#8fd3ff; }
+    .log-entry.warning { border-left-color:#FFD166; }
+    .log-entry.error { border-left-color:#FF6B6B; }
+    .filters, .diagnostics { margin-bottom:20px; }
+    button { background:#00fff9; color:#001016; border:none; padding:6px 12px; margin-right:6px; border-radius:6px; cursor:pointer; font-weight:600; }
+    button:hover { opacity:0.9; }
+    .diagnostics-result { margin-top:10px; padding:10px; background:#00252e; border-radius:6px; border:1px solid #00fff9; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Matrix OS System Logs & Diagnostics</h1>
+
+    <div class="filters">
+      <strong>Filter by level:</strong>
+      <button onclick="filterLogs('all')">All</button>
+      <button onclick="filterLogs('info')">Info</button>
+      <button onclick="filterLogs('warning')">Warning</button>
+      <button onclick="filterLogs('error')">Error</button>
+    </div>
+
+    <div class="log-container" id="logContainer">
+      <!-- Log entries will be dynamically inserted here -->
+      <div class="log-entry info">[Info] System initialized.</div>
+      <div class="log-entry warning">[Warning] Low memory warning.</div>
+      <div class="log-entry error">[Error] Failed to connect to A7 service.</div>
+      <!-- More log entries... -->
+    </div>
+
+    <div class="diagnostics">
+      <h2>Run Diagnostics</h2>
+      <button onclick="runDiagnostics()">Run Health Check</button>
+      <div class="diagnostics-result" id="diagnosticsResult">Click 'Run Health Check' to start diagnostics.</div>
+    </div>
+  </div>
+
+  <script>
+    // Simplified example: In a real scenario, you'd fetch logs from an API endpoint
+    const logs = [
+      { level: 'info', message: 'System initialized.' },
+      { level: 'warning', message: 'Low memory warning.' },
+      { level: 'error', message: 'Failed to connect to A7 service.' }
+      // Add more logs as needed
+    ];
+
+    function filterLogs(level) {
+      const container = document.getElementById('logContainer');
+      container.innerHTML = '';
