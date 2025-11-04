@@ -1,0 +1,119 @@
+matrix-os A40 central diagnostics and maintanance control panel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix OS Diagnostics Control</title>
+  <style>
+    body { font-family: 'Orbitron', sans-serif; background:#0a0f14; color:#e6ffff; margin:0; padding:20px; }
+    .container { max-width:900px; margin:40px auto; padding:20px; }
+    h1 { font-size:2rem; font-weight:900; text-shadow:0 0 12px #00fff9; text-align:center; margin-bottom:30px; }
+    .diagnostic-card {
+      background:#001b24; border:1px solid #00fff9; border-radius:10px;
+      padding:20px; margin-bottom:20px; box-shadow:0 0 20px rgba(0,255,249,.35);
+    }
+    .diagnostic-card h2 { margin-top:0; color:#8fd3ff; }
+    .status { font-weight:800; font-size:1.1rem; margin-top:10px; }
+    .ok { color:#5cffc3; }
+    .warn { color:#FFD166; }
+    .bad { color:#FF6B6B; }
+    button {
+      background:#00fff9; color:#001016; border:none; padding:8px 16px;
+      border-radius:6px; font-weight:800; cursor:pointer; margin-top:12px;
+    }
+    button:hover { filter:brightness(1.1); }
+    .results { background:#00252e; border-radius:8px; padding:10px; margin-top:10px; border:1px solid #00fff9; }
+    .progress-bar { height:14px; border-radius:4px; background:#00252e; margin-top:6px; overflow:hidden; }
+    .progress-fill { height:100%; background:#00fff9; width:0%; transition:width 0.4s ease-out; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Matrix OS Diagnostics Control</h1>
+
+    <div class="diagnostic-card">
+      <h2>CPU Diagnostic</h2>
+      <div class="status" id="cpuStatus">Status: <span class="warn">Idle</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="cpuBar"></div></div>
+      <button onclick="runCPUCheck()">Run CPU Test</button>
+      <div class="results" id="cpuResults"></div>
+    </div>
+
+    <div class="diagnostic-card">
+      <h2>Memory Diagnostic</h2>
+      <div class="status" id="memStatus">Status: <span class="warn">Idle</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="memBar"></div></div>
+      <button onclick="runMemoryCheck()">Run Memory Test</button>
+      <div class="results" id="memResults"></div>
+    </div>
+
+    <div class="diagnostic-card">
+      <h2>Network Diagnostic</h2>
+      <div class="status" id="netStatus">Status: <span class="warn">Idle</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="netBar"></div></div>
+      <button onclick="runNetworkCheck()">Run Network Test</button>
+      <div class="results" id="netResults"></div>
+    </div>
+
+    <div class="diagnostic-card">
+      <h2>AI Core Diagnostic</h2>
+      <div class="status" id="aiStatus">Status: <span class="warn">Idle</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="aiBar"></div></div>
+      <button onclick="runAICheck()">Run AI Core Scan</button>
+      <div class="results" id="aiResults"></div>
+    </div>
+  </div>
+
+  <script>
+    function simulateProgress(barId, callback) {
+      const bar = document.getElementById(barId);
+      let width = 0;
+      const timer = setInterval(() => {
+        width += 10;
+        bar.style.width = width + "%";
+        if(width >= 100){ clearInterval(timer); setTimeout(callback, 300); }
+      }, 200);
+    }
+
+    function runCPUCheck(){
+      document.getElementById("cpuStatus").innerHTML = "Status: <span class='warn'>Testing...</span>";
+      simulateProgress("cpuBar", ()=> {
+        const score = Math.floor(Math.random()*100);
+        const cls = score>70?"ok":score>40?"warn":"bad";
+        document.getElementById("cpuStatus").innerHTML = "Status: <span class='"+cls+"'>"+(cls==="ok"?"Optimal":cls==="warn"?"Moderate":"Overload")+"</span>";
+        document.getElementById("cpuResults").innerText = "CPU Health Score: "+score+" / 100";
+      });
+    }
+
+    function runMemoryCheck(){
+      document.getElementById("memStatus").innerHTML = "Status: <span class='warn'>Testing...</span>";
+      simulateProgress("memBar", ()=> {
+        const latency = (Math.random()*200).toFixed(2);
+        document.getElementById("memStatus").innerHTML = "Status: <span class='ok'>Stable</span>";
+        document.getElementById("memResults").innerText = "Memory Latency: "+latency+" ms";
+      });
+    }
+
+    function runNetworkCheck(){
+      document.getElementById("netStatus").innerHTML = "Status: <span class='warn'>Testing...</span>";
+      simulateProgress("netBar", ()=> {
+        const ping = (Math.random()*50).toFixed(2);
+        const cls = ping<20?"ok":ping<35?"warn":"bad";
+        document.getElementById("netStatus").innerHTML = "Status: <span class='"+cls+"'>"+(cls==="ok"?"Connected":cls==="warn"?"Slow":"Unstable")+"</span>";
+        document.getElementById("netResults").innerText = "Network Ping: "+ping+" ms";
+      });
+    }
+
+    function runAICheck(){
+      document.getElementById("aiStatus").innerHTML = "Status: <span class='warn'>Scanning...</span>";
+      simulateProgress("aiBar", ()=> {
+        const stability = (Math.random()*100).toFixed(1);
+        const cls = stability>70?"ok":stability>40?"warn":"bad";
+        document.getElementById("aiStatus").innerHTML = "Status: <span class='"+cls+"'>"+(cls==="ok"?"Operational":cls==="warn"?"Learning":"Desynced")+"</span>";
+        document.getElementById("aiResults").innerText = "AI Core Stability: "+stability+"%";
+      });
+    }
+  </script>
+</body>
+</html>
