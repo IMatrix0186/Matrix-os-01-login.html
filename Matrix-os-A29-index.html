@@ -1,0 +1,70 @@
+matrix-os A29 index .html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix OS Master Index</title>
+  <style>
+    body{ font-family: 'Orbitron', sans-serif; background:#001b24; color:#e6ffff; margin:0; padding:0; }
+    a{ color:#00fff9; text-decoration:none; }
+    a:hover{ text-decoration:underline; }
+    .container{ max-width:860px; margin:40px auto; padding:20px; }
+    .title{ font-size:2rem; font-weight:900; text-align:center; margin-bottom:20px; text-shadow:0 0 12px #00fff9; }
+    .module-list{ list-style:none; padding:0; }
+    .module-list li{
+      background:rgba(0,0,0,0.55); border-left:6px solid #00fff9;
+      margin:12px 0; padding:16px; border-radius:8px; box-shadow:0 0 18px rgba(0,255,249,.35); display:flex; flex-direction:column; }
+    .name{ font-weight:800; margin-bottom:6px; font-size:1.2rem; }
+    .desc{ font-size:0.95rem; opacity:0.9; }
+    .status{ margin-top:10px; font-size:0.85rem; display:flex; gap:12px; align-items:center; }
+    .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 10px currentColor; }
+    .ok{ color:#5cffc3; }
+    .bad{ color:#ff6b6b; }
+    .loading{ opacity:0.6; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">Matrix OS Master Index</div>
+    <ul class="module-list">
+      <!-- Example entries (A1–A2) -->
+      <li data-id="A1">
+        <div class="name"><a href="matrix-OS-A1-login.html">A1 – Login Page</a></div>
+        <div class="desc">User login interface for Matrix OS.</div>
+        <div class="status">Status: <span class="dot loading"></span><span>Loading...</span></div>
+      </li>
+      <li data-id="A2">
+        <div class="name"><a href="matrix-OS-A2-core.html">A2 – Core System</a></div>
+        <div class="desc">Core backend services and main logic engine.</div>
+        <div class="status">Status: <span class="dot loading"></span><span>Loading...</span></div>
+      </li>
+      <!-- Repeat similarly for A3, A4, ... A28 -->
+      <!-- You'll fill in each entry in the same format, linking to each page and giving a short description -->
+    </ul>
+  </div>
+
+  <script>
+    // Configuration
+    const SERVICE_MAP = {
+      "A1": { url:"/api/status", port:5070 }, // example
+      "A2": { url:"/api/health", port:5000 },
+      // Add mappings for all A3–A28 similarly
+    };
+
+    // Fetch status for each service
+    async function fetchStatus(id){
+      const svc = SERVICE_MAP[id];
+      if(!svc) return null;
+      try{
+        const res = await fetch(`http://127.0.0.1:${svc.port}${svc.url}`);
+        return res.ok ? "ok" : "bad";
+      } catch { return "bad"; }
+    }
+
+    // Update all statuses
+    async function updateStatuses(){
+      const items = document.querySelectorAll(".module-list li");
+      for(const li of items){
+        const id = li.getAttribute("data-id");
+        const dot = li.querySelector
