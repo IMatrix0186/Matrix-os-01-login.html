@@ -1,0 +1,42 @@
+matrix-os A32 system dashboard
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix OS System Dashboard</title>
+  <style>
+    body { font-family: 'Orbitron', sans-serif; background:#0a0f14; color:#e6ffff; margin:0; padding:0; }
+    .container { max-width:900px; margin:40px auto; padding:20px; }
+    h1 { font-size:2rem; font-weight:900; text-shadow:0 0 12px #00fff9; margin-bottom:20px; }
+    .dashboard { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .card { background:#001b24; border:1px solid #00fff9; border-radius:8px; padding:20px; text-align:center; }
+    .card h2 { margin-top:0; font-size:1.4rem; color:#8fd3ff; }
+    .bar { background:#00252e; border-radius:4px; margin-top:10px; position:relative; height:20px; }
+    .bar-fill { background:#00fff9; height:100%; border-radius:4px; }
+    .bar-label { position:absolute; top:0; left:10px; font-size:0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Matrix OS System Dashboard</h1>
+    <div class="dashboard">
+      <div class="card">
+        <h2>CPU Usage</h2>
+        <div class="bar">
+          <div class="bar-fill" style="width:65%;"></div>
+          <div class="bar-label">65%</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Memory Usage</h2>
+        <div class="bar">
+          <div class="bar-fill" style="width:75%;"></div>
+          <div class="bar-label">75%</div>
+        </div>
+      </div>
+      <!-- Add more system cards here for other metrics -->
+    </div>
+  </div>
+</body>
+</html>
