@@ -1,0 +1,68 @@
+matrix-os A33 log monitor
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix OS Log Monitor</title>
+  <style>
+    body { font-family: 'Orbitron', sans-serif; background:#0a0f14; color:#e6ffff; margin:0; padding:0; }
+    .container { max-width:900px; margin:40px auto; padding:20px; }
+    h1 { font-size:2rem; font-weight:900; text-shadow:0 0 12px #00fff9; margin-bottom:20px; }
+    .log-container { background:#001b24; border:1px solid #00fff9; border-radius:8px; padding:20px; height:400px; overflow-y:auto; margin-top:20px; }
+    .log-entry { padding:8px; border-bottom:1px solid #00fff9; font-size:0.9rem; }
+    .log-entry.error { color:#ff4f4f; }
+    .log-entry.warning { color:#ffae42; }
+    .log-entry.info { color:#8fd3ff; }
+    .filter { margin-bottom:20px; }
+    select { padding:8px; border-radius:4px; background:#001b24; color:#e6ffff; border:1px solid #00fff9; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Matrix OS Log Monitor</h1>
+    <div class="filter">
+      <label for="logFilter">Filter logs:</label>
+      <select id="logFilter" onchange="filterLogs(this.value)">
+        <option value="all">All</option>
+        <option value="info">Info</option>
+        <option value="warning">Warning</option>
+        <option value="error">Error</option>
+      </select>
+    </div>
+    <div class="log-container" id="logContainer">
+      <!-- Log entries will be dynamically inserted here -->
+    </div>
+  </div>
+
+  <script>
+    const logs = [
+      { type: 'info', message: 'System started successfully.', time: '08:00' },
+      { type: 'warning', message: 'High memory usage detected.', time: '08:05' },
+      { type: 'error', message: 'Failed to connect to server.', time: '08:10' }
+      // Add more logs as needed
+    ];
+
+    function loadLogs() {
+      const container = document.getElementById('logContainer');
+      container.innerHTML = ''; // Clear current logs
+      logs.forEach(log => {
+        const entry = `<div class="log-entry ${log.type}">${log.time} - [${log.type.toUpperCase()}] ${log.message}</div>`;
+        container.innerHTML += entry;
+      });
+    }
+
+    function filterLogs(type) {
+      const container = document.getElementById('logContainer');
+      container.innerHTML = ''; // Clear current logs
+      logs.filter(log => type === 'all' || log.type === type).forEach(log => {
+        const entry = `<div class="log-entry ${log.type}">${log.time} - [${log.type.toUpperCase()}] ${log.message}</div>`;
+        container.innerHTML += entry;
+      });
+    }
+
+    // Load logs on page load
+    loadLogs();
+  </script>
+</body>
+</html>
