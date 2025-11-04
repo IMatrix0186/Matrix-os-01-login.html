@@ -1,0 +1,84 @@
+matrix-os user management system
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix OS User Management</title>
+  <style>
+    body { font-family: 'Orbitron', sans-serif; background:#0a0f14; color:#e6ffff; margin:0; padding:0; }
+    .container { max-width:1000px; margin:40px auto; padding:20px; }
+    h1 { font-size:2rem; font-weight:900; text-shadow:0 0 12px #00fff9; margin-bottom:20px; }
+    .user-list { border:1px solid #00fff9; background:#001b24; border-radius:8px; padding:16px; margin-bottom:20px; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { padding:10px; border-bottom:1px solid #00fff9; text-align:left; }
+    th { background:#00252e; }
+    .user-actions { margin-top:20px; }
+    input, select { padding:8px; margin-right:8px; border-radius:4px; border:1px solid #00fff9; background:#001b24; color:#e6ffff; }
+    button { background:#00fff9; color:#001016; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; }
+    button:hover { opacity:0.9; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Matrix OS User Management</h1>
+
+    <div class="user-list">
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="userTable">
+          <!-- User rows will be dynamically inserted here -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="user-actions">
+      <h2>Add New User</h2>
+      <input type="text" placeholder="Username" id="newUsername">
+      <select id="newUserRole">
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button onclick="addUser()">Add User</button>
+    </div>
+  </div>
+
+  <script>
+    // Simulated user data (replace with real API calls)
+    const users = [
+      { username: 'alice', role: 'admin', status: 'active' },
+      { username: 'bob', role: 'user', status: 'inactive' }
+      // Add more users as needed
+    ];
+
+    function loadUsers() {
+      const table = document.getElementById('userTable');
+      table.innerHTML = ''; // Clear table
+      users.forEach((user, index) => {
+        const row = `<tr>
+          <td>${user.username}</td>
+          <td>${user.role}</td>
+          <td>${user.status}</td>
+          <td>
+            <button onclick="editUser(${index})">Edit</button>
+            <button onclick="deleteUser(${index})">Delete</button>
+          </td>
+        </tr>`;
+        table.innerHTML += row;
+      });
+    }
+
+    function addUser() {
+      const username = document.getElementById('newUsername').value.trim();
+      const role = document.getElementById('newUserRole').value;
+      if(username){
+        users.push({ username, role, status: 'active' });
+        loadUsers();
+        document.
