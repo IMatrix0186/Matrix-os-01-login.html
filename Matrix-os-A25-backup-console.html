@@ -1,0 +1,183 @@
+add matrix-os A25 backup console file (ui for A24 backups)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Matrix – Backup Console (A25)</title>
+<style>
+  :root { --c:#00fff9; --ok:#5cffc3; --bad:#ff6b6b; }
+  body { margin:0; padding:20px; background:linear-gradient(135deg,#000,#06131a 55%,#001b24); color:var(--c); font-family:"Orbitron",system-ui,Arial,sans-serif; }
+  header { text-align:center; font-size:1.6rem; text-shadow:0 0 16px var(--c); margin-bottom:14px; }
+  .grid { display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+  .card { border:1px solid var(--c); border-radius:12px; background:rgba(0,0,0,.55); box-shadow:0 0 22px var(--c); padding:16px; }
+  .title { margin:0 0 8px; font-size:1.1rem; text-shadow:0 0 8px var(--c); }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:8px 0; }
+  button { background:var(--c); color:#000; border:none; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer; }
+  button:hover { filter:brightness(1.08); transform:scale(1.02); }
+  select, input[type="file"] { border:none; border-radius:8px; padding:8px 10px; background:#001821; color:#aef; }
+  table { width:100%; border-collapse:collapse; margin-top:8px; }
+  th, td { padding:8px; border-bottom:1px solid #044c52; text-align:center; }
+  th { background:rgba(0,255,249,.08); text-shadow:0 0 5px var(--c); }
+  .muted { color:#aee; opacity:.9; }
+  .ok { color:var(--ok); } .bad { color:var(--bad); }
+  pre { white-space:pre-wrap; word-wrap:break-word; color:#aef; background:rgba(0,0,0,.35); padding:10px; border-radius:8px; border:1px dashed var(--c); max-height:360px; overflow:auto; }
+</style>
+</head>
+<body>
+<header>Matrix Backup Console</header>
+
+<div class="grid">
+  <!-- Create Backups -->
+  <div class="card">
+    <p class="title">Create Backup</p>
+    <div class="row">
+      <button id="bkA5">Backup A5 (Users DB)</button>
+      <button id="bkA18">Backup A18 (Telemetry DB)</button>
+    </div>
+    <div class="row"><span class="muted" id="ts">Last action: —</span></div>
+    <pre id="out">—</pre>
+  </div>
+
+  <!-- List / Download / Restore -->
+  <div class="card">
+    <p class="title">Manage Backups</p>
+    <div class="row">
+      <button id="refreshList">Refresh List</button>
+      <label class="muted">Target DB:
+        <select id="targetDb">
+          <option value="a5">A5 (users)</option>
+          <option value="telemetry">A18 (telemetry)</option>
+        </select>
+      </label>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Size</th><th>Modified</th><th>Actions</th></tr>
+      </thead>
+      <tbody id="listBody"><tr><td colspan="4">Loading…</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- Upload & Restore -->
+  <div class="card">
+    <p class="title">Upload & Restore</p>
+    <div class="row">
+      <input type="file" id="fileInput" accept=".sqlite,.sqlite3,.db"/>
+      <select id="uploadTarget">
+        <option value="a5">Restore to A5 (users)</option>
+        <option value="telemetry">Restore to A18 (telemetry)</option>
+      </select>
+    </div>
+    <div class="row">
+      <button id="uploadBtn">Upload & Restore</button>
+    </div>
+    <pre id="uploadOut">—</pre>
+  </div>
+
+  <!-- Help -->
+  <div class="card">
+    <p class="title">How this works</p>
+    <div class="row">
+      <div class="muted">
+        This console expects A24 endpoints:<br/>
+        <code>GET /api/backup/list</code>,
+        <code>POST /api/backup/create</code>,
+        <code>GET /api/backup/download?name=...</code>,
+        <code>POST /api/backup/restore</code>.<br/><br/>
+        If your paths differ, update the <code>BASE</code> URL or handler names below.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BASE = "http://127.0.0.1:5068"; // set to the port where A24 runs
+const API = {
+  list: BASE + "/api/backup/list",
+  create: BASE + "/api/backup/create",
+  download: BASE + "/api/backup/download",
+  restore: BASE + "/api/backup/restore"
+};
+
+function ts(){ document.getElementById("ts").textContent = "Last action: " + new Date().toLocaleTimeString(); }
+function show(obj){ document.getElementById("out").textContent = (typeof obj==="string")?obj:JSON.stringify(obj,null,2); }
+function showUpload(obj){ document.getElementById("uploadOut").textContent = (typeof obj==="string")?obj:JSON.stringify(obj,null,2); }
+
+async function createBackup(dbKey){
+  try{
+    const r = await fetch(API.create, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ db: dbKey }) });
+    const j = await r.json();
+    show(j);
+    ts();
+    await loadList();
+  }catch(e){ show("Connection error: " + e); ts(); }
+}
+
+async function loadList(){
+  try{
+    const r = await fetch(API.list);
+    const j = await r.json();
+    if(!j.ok){ document.getElementById("listBody").innerHTML = `<tr><td colspan="4">Error: ${j.error||"Unknown"}</td></tr>`; return; }
+    const items = j.backups || [];
+    if(!items.length){ document.getElementById("listBody").innerHTML = `<tr><td colspan="4">No backups found.</td></tr>`; return; }
+    const rows = items.map(b=>{
+      const name = b.name || b.filename || "";
+      const size = b.size_readable || (b.size + " B");
+      const mtime = b.mtime || b.modified || "";
+      const href = API.download + "?name=" + encodeURIComponent(name);
+      return `<tr>
+        <td style="word-break:break-all">${name}</td>
+        <td>${size}</td>
+        <td>${mtime}</td>
+        <td>
+          <a href="${href}" download><button>Download</button></a>
+          <button onclick="restoreNamed('${name}')">Restore</button>
+        </td>
+      </tr>`;
+    }).join("");
+    document.getElementById("listBody").innerHTML = rows;
+  }catch(e){
+    document.getElementById("listBody").innerHTML = `<tr><td colspan="4">Connection error: ${e}</td></tr>`;
+  }
+}
+
+async function restoreNamed(name){
+  const db = document.getElementById("targetDb").value;
+  if(!confirm(`Restore '${name}' to ${db.toUpperCase()}? This will overwrite that DB.`)) return;
+  try{
+    const r = await fetch(API.restore, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ name, db }) });
+    const j = await r.json();
+    show(j);
+    ts();
+  }catch(e){ show("Connection error: " + e); ts(); }
+}
+
+async function uploadAndRestore(){
+  const file = document.getElementById("fileInput").files[0];
+  const db = document.getElementById("uploadTarget").value;
+  if(!file){ showUpload("Choose a file first."); return; }
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("db", db);
+  try{
+    const r = await fetch(API.restore, { method:"POST", body: fd });
+    const j = await r.json();
+    showUpload(j);
+  }catch(e){ showUpload("Connection error: " + e); }
+}
+
+// Wire controls
+document.getElementById("bkA5").addEventListener("click", ()=>createBackup("a5"));
+document.getElementById("bkA18").addEventListener("click", ()=>createBackup("telemetry"));
+document.getElementById("refreshList").addEventListener("click", loadList);
+document.getElementById("uploadBtn").addEventListener("click", uploadAndRestore);
+
+// Initial
+loadList();
+</script>
+
+<!-- Protect the page: require Developer (Level 3) -->
+<script src="matrix-OS-A14-guard.js" data-min-level="3"></script>
+</body>
+</html>
