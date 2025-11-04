@@ -1,0 +1,39 @@
+matrix-os A35 settings panel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix OS Settings Panel</title>
+  <style>
+    body { font-family: 'Orbitron', sans-serif; background:#0a0f14; color:#e6ffff; margin:0; padding:0; display:flex; align-items:center; justify-content:center; height:100vh; }
+    .settings-container { background:#001b24; border:1px solid #00fff9; border-radius:8px; padding:30px; width:400px; box-shadow:0 0 15px #00fff9; }
+    .settings-container h2 { margin-top:0; font-size:1.5rem; margin-bottom:20px; }
+    .setting { margin-bottom:15px; }
+    .setting label { display:block; margin-bottom:5px; }
+    .setting select, .setting input[type="checkbox"] { margin-top:5px; }
+    .btn { width:100%; padding:10px; background:#00fff9; border:none; border-radius:4px; font-size:1rem; color:#001b24; cursor:pointer; margin-top:20px; }
+    .btn:hover { background:#00c9d6; }
+  </style>
+</head>
+<body>
+  <div class="settings-container">
+    <h2>Settings</h2>
+    <div class="setting">
+      <label for="themeSelect">Theme</label>
+      <select id="themeSelect">
+        <option value="default">Default</option>
+        <option value="dark">Dark Mode</option>
+        <option value="light">Light Mode</option>
+      </select>
+    </div>
+    <div class="setting">
+      <label>
+        <input type="checkbox" id="notificationsToggle"> Enable Notifications
+      </label>
+    </div>
+    <!-- Add more settings as needed -->
+    <button class="btn">Save Settings</button>
+  </div>
+</body>
+</html>
