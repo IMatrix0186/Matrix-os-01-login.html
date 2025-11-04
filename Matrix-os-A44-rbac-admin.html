@@ -1,0 +1,219 @@
+matrix-os A44 rbac admin. file
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Matrix OS – RBAC Admin (A44)</title>
+<style>
+  :root { --c:#00fff9; --ok:#5cffc3; --bad:#ff6b6b; --bg:#001b24; }
+  body{ margin:0; background:linear-gradient(135deg,#000,#06131a 55%,#001b24); color:#e6ffff; font-family:"Orbitron",system-ui,Arial,sans-serif; }
+  header{ padding:16px; text-align:center; font-size:1.6rem; color:var(--c); text-shadow:0 0 14px var(--c); border-bottom:1px solid var(--c); }
+  .wrap{ padding:20px; display:grid; gap:16px; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); }
+  .card{ border:1px solid var(--c); border-radius:12px; background:rgba(0,0,0,.55); box-shadow:0 0 18px rgba(0,255,249,.35); padding:16px; }
+  .title{ margin:0 0 10px; font-weight:900; text-shadow:0 0 8px var(--c); color:var(--c); }
+  .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:8px 0; }
+  input,select{ background:#00212b; color:#aef; border:1px solid var(--c); border-radius:8px; padding:10px; flex:1; min-width:120px; }
+  button{ background:var(--c); color:#001016; border:none; border-radius:10px; padding:10px 14px; font-weight:800; cursor:pointer; }
+  button:hover{ filter:brightness(1.08); transform:scale(1.02); }
+  table{ width:100%; border-collapse:collapse; margin-top:8px; }
+  th,td{ padding:8px; border-bottom:1px solid #044c52; text-align:left; }
+  th{ background:rgba(0,255,249,.08); text-shadow:0 0 5px var(--c); }
+  .muted{ color:#aee; opacity:.9; }
+  .ok{ color:var(--ok); } .bad{ color:var(--bad); }
+  pre{ white-space:pre-wrap; word-wrap:break-word; background:#00161c; color:#aef; padding:10px; border-radius:8px; border:1px dashed var(--c); max-height:260px; overflow:auto; }
+</style>
+</head>
+<body>
+<header>Matrix OS – RBAC Admin (A44)</header>
+
+<div class="wrap">
+  <!-- Create Role -->
+  <div class="card">
+    <h3 class="title">Create Role</h3>
+    <div class="row">
+      <input id="roleName" placeholder="Role name (e.g., operator)"/>
+      <button onclick="createRole()">Create</button>
+    </div>
+    <div class="muted">POST /api/rbac/role { name }</div>
+    <pre id="roleOut">—</pre>
+  </div>
+
+  <!-- Create Permission -->
+  <div class="card">
+    <h3 class="title">Create Permission</h3>
+    <div class="row">
+      <input id="permName" placeholder="Permission (e.g., analytics.read)"/>
+      <button onclick="createPerm()">Create</button>
+    </div>
+    <div class="muted">POST /api/rbac/perm { name }</div>
+    <pre id="permOut">—</pre>
+  </div>
+
+  <!-- Grant perm to role -->
+  <div class="card">
+    <h3 class="title">Grant Permission → Role</h3>
+    <div class="row">
+      <input id="grantRole" placeholder="Role (e.g., operator)"/>
+      <input id="grantPerm" placeholder="Permission (e.g., analytics.read)"/>
+      <button onclick="grant()">Grant</button>
+    </div>
+    <div class="muted">POST /api/rbac/role/grant { role, perm }</div>
+    <pre id="grantOut">—</pre>
+  </div>
+
+  <!-- Assign role to user -->
+  <div class="card">
+    <h3 class="title">Assign Role → User</h3>
+    <div class="row">
+      <input id="assignUser" placeholder="User (e.g., Alice)"/>
+      <input id="assignRole" placeholder="Role (e.g., operator)"/>
+      <button onclick="assign()">Assign</button>
+    </div>
+    <div class="muted">POST /api/rbac/user/assign { user, role }</div>
+    <pre id="assignOut">—</pre>
+  </div>
+
+  <!-- Inspect user -->
+  <div class="card">
+    <h3 class="title">Inspect User</h3>
+    <div class="row">
+      <input id="inspectUser" placeholder="User (e.g., Alice)"/>
+      <button onclick="inspect()">Load Roles & Effective Perms</button>
+    </div>
+    <table>
+      <thead><tr><th>Roles</th><th>Permissions (by role)</th></tr></thead>
+      <tbody id="inspectBody"><tr><td colspan="2" class="muted">—</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- Check access -->
+  <div class="card">
+    <h3 class="title">Check Access</h3>
+    <div class="row">
+      <input id="checkUser" placeholder="User"/>
+      <input id="checkPerm" placeholder="Permission (e.g., backup.exec)"/>
+      <button onclick="checkAccess()">Check</button>
+    </div>
+    <div id="checkOut" class="muted">—</div>
+  </div>
+
+  <!-- Export -->
+  <div class="card">
+    <h3 class="title">Export RBAC Map</h3>
+    <div class="row">
+      <button onclick="exportAll()">Export</button>
+      <span class="muted">GET /api/rbac/export</span>
+    </div>
+    <pre id="exportOut">—</pre>
+  </div>
+
+  <!-- Config -->
+  <div class="card">
+    <h3 class="title">Config</h3>
+    <div class="row">
+      <input id="baseUrl" placeholder="A42 base (http://127.0.0.1:5072)"/>
+      <button onclick="applyBase()">Set Base</button>
+    </div>
+    <div class="muted">Current: <span id="baseNow">http://127.0.0.1:5072</span></div>
+  </div>
+</div>
+
+<script>
+let BASE = "http://127.0.0.1:5072"; // Change here or via the Config card
+
+function show(id, data){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent = (typeof data==="string") ? data : JSON.stringify(data, null, 2);
+}
+
+async function post(path, body){
+  const r = await fetch(BASE + path, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body||{}) });
+  return r.json();
+}
+async function get(path){
+  const r = await fetch(BASE + path);
+  return r.json();
+}
+
+async function createRole(){
+  const name = document.getElementById("roleName").value.trim();
+  if(!name) return show("roleOut","Enter a role name.");
+  const j = await post("/api/rbac/role", { name });
+  show("roleOut", j);
+}
+async function createPerm(){
+  const name = document.getElementById("permName").value.trim();
+  if(!name) return show("permOut","Enter a permission string.");
+  const j = await post("/api/rbac/perm", { name });
+  show("permOut", j);
+}
+async function grant(){
+  const role = document.getElementById("grantRole").value.trim();
+  const perm = document.getElementById("grantPerm").value.trim();
+  if(!role || !perm) return show("grantOut","Enter role and permission.");
+  const j = await post("/api/rbac/role/grant", { role, perm });
+  show("grantOut", j);
+}
+async function assign(){
+  const user = document.getElementById("assignUser").value.trim();
+  const role = document.getElementById("assignRole").value.trim();
+  if(!user || !role) return show("assignOut","Enter user and role.");
+  const j = await post("/api/rbac/user/assign", { user, role });
+  show("assignOut", j);
+}
+async function inspect(){
+  const user = document.getElementById("inspectUser").value.trim();
+  if(!user){ document.getElementById("inspectBody").innerHTML = `<tr><td colspan="2" class="muted">Enter a user.</td></tr>`; return; }
+
+  // Load roles for user
+  const rolesResp = await get(`/api/rbac/user/roles?user=${encodeURIComponent(user)}`);
+  const roles = (rolesResp.ok ? rolesResp.roles : []) || [];
+
+  // For each role, load perms
+  let rowsHtml = "";
+  let allPerms = new Set();
+  for(const role of roles){
+    const rp = await get(`/api/rbac/role/perms?role=${encodeURIComponent(role)}`);
+    const perms = (rp.ok ? rp.perms : []) || [];
+    perms.forEach(p=>allPerms.add(p));
+    rowsHtml += `<tr><td>${role}</td><td>${perms.join(", ")||"<span class='muted'>—</span>"}</td></tr>`;
+  }
+  if(!roles.length){
+    rowsHtml = `<tr><td colspan="2" class="muted">No roles for user.</td></tr>`;
+  } else {
+    rowsHtml += `<tr><th>Total</th><td>${Array.from(allPerms).sort().join(", ")||"<span class='muted'>—</span>"}</td></tr>`;
+  }
+  document.getElementById("inspectBody").innerHTML = rowsHtml;
+}
+
+async function checkAccess(){
+  const user = document.getElementById("checkUser").value.trim();
+  const perm = document.getElementById("checkPerm").value.trim();
+  if(!user || !perm) return document.getElementById("checkOut").innerHTML = "Enter user and permission.";
+  const j = await get(`/api/rbac/check?user=${encodeURIComponent(user)}&perm=${encodeURIComponent(perm)}`);
+  document.getElementById("checkOut").innerHTML = j.ok ? (j.allowed ? "<span class='ok'>ALLOWED</span>" : "<span class='bad'>DENIED</span>") : `<span class='bad'>Error</span>`;
+}
+
+async function exportAll(){
+  const j = await get("/api/rbac/export");
+  show("exportOut", j);
+}
+
+function applyBase(){
+  const v = document.getElementById("baseUrl").value.trim();
+  if(!v) return;
+  BASE = v.replace(/\/+$/,"");
+  document.getElementById("baseNow").textContent = BASE;
+}
+</script>
+
+<!-- Optional: lock down the admin page itself using A43 -->
+<!--
+<script src="matrix-OS-A43-rbac-guard.js"
+        data-base="http://127.0.0.1:5072"
+        data-user="Admin"></script>
+-->
+</body>
+</html>
