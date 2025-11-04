@@ -1,0 +1,89 @@
+matrix-os A23 logistics/Console system
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Matrix – Logistics Console (A23)</title>
+<style>
+  :root { --c:#00fff9; --ok:#5cffc3; --bad:#ff6b6b; }
+  body { margin:0; padding:20px; background:linear-gradient(135deg,#000,#06131a 55%,#001b24); color:var(--c); font-family:"Orbitron",system-ui,Arial,sans-serif; }
+  header { text-align:center; font-size:1.6rem; text-shadow:0 0 16px var(--c); margin-bottom:14px; }
+  .grid { display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .card { border:1px solid var(--c); border-radius:12px; background:rgba(0,0,0,.55); box-shadow:0 0 22px var(--c); padding:16px; }
+  .title { margin:0 0 8px; font-size:1.1rem; text-shadow:0 0 8px var(--c); }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:8px 0; }
+  button { background:var(--c); color:#000; border:none; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer; }
+  button:hover { filter:brightness(1.08); transform:scale(1.02); }
+  .muted { color:#aee; opacity:.9; }
+  .ok { color:var(--ok); } .bad { color:var(--bad); }
+  pre { white-space:pre-wrap; word-wrap:break-word; color:#aef; background:rgba(0,0,0,.35); padding:10px; border-radius:8px; border:1px dashed var(--c); max-height:360px; overflow:auto; }
+</style>
+</head>
+<body>
+<header>Matrix Logistics Console</header>
+
+<div class="grid">
+  <!-- Controls -->
+  <div class="card">
+    <p class="title">Controls</p>
+    <div class="row">
+      <button id="startBtn">Start Scheduler</button>
+      <button id="statusBtn">Check Status</button>
+      <button id="stopBtn">Stop (placeholder)</button>
+    </div>
+    <div class="row">
+      <span class="muted" id="ts">Last update: —</span>
+    </div>
+    <pre id="out">—</pre>
+  </div>
+
+  <!-- Help -->
+  <div class="card">
+    <p class="title">How this works</p>
+    <div class="row">
+      <div class="muted">
+        This console talks to your <code>matrix-OS-A22-logistics.py</code> service:
+        <ul>
+          <li><code>GET /api/logistics/start</code> – starts periodic tasks</li>
+          <li><code>GET /api/logistics/status</code> – shows current status</li>
+          <li><code>GET /api/logistics/stop</code> – placeholder response (daemon threads)</li>
+        </ul>
+        Keep the A22 server running to maintain background maintenance (cleanup, AI upkeep, data sync).
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const A22 = "http://127.0.0.1:5000"; // change if your A22 runs elsewhere
+const START  = A22 + "/api/logistics/start";
+const STATUS = A22 + "/api/logistics/status";
+const STOP   = A22 + "/api/logistics/stop";
+
+function setTS(){ document.getElementById("ts").textContent = "Last update: " + new Date().toLocaleTimeString(); }
+function show(obj){ document.getElementById("out").textContent = (typeof obj==="string")?obj:JSON.stringify(obj,null,2); }
+
+async function call(url){
+  try{
+    const r = await fetch(url);
+    const j = await r.json();
+    show(j);
+  }catch(e){
+    show("Connection error: " + e + "\n\nTip: Is A22 running?");
+  }
+  setTS();
+}
+
+document.getElementById("startBtn").addEventListener("click", ()=>call(START));
+document.getElementById("statusBtn").addEventListener("click", ()=>call(STATUS));
+document.getElementById("stopBtn").addEventListener("click", ()=>call(STOP));
+
+// Auto-check status on load
+call(STATUS);
+</script>
+
+<!-- Protect the page: require Developer (Level 3) -->
+<script src="matrix-OS-A14-guard.js" data-min-level="3"></script>
+</body>
+</html>
